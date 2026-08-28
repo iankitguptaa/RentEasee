@@ -4,7 +4,7 @@ import { useApp } from '../../context/AppContext';
 import { Logo } from './Logo';
 
 export const Navbar = () => {
-  const { activePage, navigateTo, savedPropertyIds, user, setIsAuthModalOpen, setAuthMode, theme, toggleTheme } = useApp();
+  const { activePage, navigateTo, savedPropertyIds, user, logoutUser, setIsAuthModalOpen, setAuthMode, theme, toggleTheme } = useApp();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
@@ -93,11 +93,11 @@ export const Navbar = () => {
                 className="flex items-center gap-2 p-1 pl-2 pr-3.5 rounded-full border border-white/60 dark:border-white/10 hover:border-[#16a34a] bg-white/60 dark:bg-black/60 backdrop-blur-md transition-all text-xs font-semibold shadow-xs"
               >
                 <img
-                  src={user.avatar}
-                  alt={user.name}
+                  src={user?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80'}
+                  alt={user?.name || 'User'}
                   className="w-6 h-6 rounded-full object-cover border border-[#16a34a]"
                 />
-                <span className="text-[#171717] dark:text-white font-medium">{user.name.split(' ')[0]}</span>
+                <span className="text-[#171717] dark:text-white font-medium">{(user?.name || 'User').split(' ')[0]}</span>
               </button>
 
               {/* User Dropdown Menu */}
@@ -107,8 +107,8 @@ export const Navbar = () => {
                   onMouseLeave={() => setUserDropdownOpen(false)}
                 >
                   <div className="px-4 py-2.5 rounded-xl bg-white/40 dark:bg-black/40 mb-1 border border-white/40 dark:border-white/10">
-                    <p className="font-bold text-sm text-[#171717] dark:text-white">{user.name}</p>
-                    <p className="text-[#888888] dark:text-[#a1a1a1] text-[11px] truncate">{user.email}</p>
+                    <p className="font-bold text-sm text-[#171717] dark:text-white">{user?.name || 'User'}</p>
+                    <p className="text-[#888888] dark:text-[#a1a1a1] text-[11px] truncate">{user?.email || ''}</p>
                   </div>
                   
                   <button
@@ -149,7 +149,7 @@ export const Navbar = () => {
                   <button
                     onClick={() => {
                       setUserDropdownOpen(false);
-                      handleNavClick('home');
+                      logoutUser();
                     }}
                     className="w-full text-left px-3.5 py-2 rounded-lg text-rose-600 hover:bg-rose-500/10 font-semibold transition-colors"
                   >
@@ -225,22 +225,33 @@ export const Navbar = () => {
             })}
           </div>
 
-          <div className="pt-2 border-t border-white/40 dark:border-white/10 flex items-center justify-between">
+          <div className="pt-3 border-t border-white/40 dark:border-white/10 space-y-2">
             {user.isLoggedIn ? (
-              <div className="flex items-center gap-3 w-full justify-between">
-                <div className="flex items-center gap-2">
-                  <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-full border border-[#16a34a]" />
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <img src={user.avatar} alt={user.name} className="w-9 h-9 rounded-full border border-[#16a34a]" />
                   <div>
                     <p className="text-xs font-semibold text-[#171717] dark:text-white">{user.name}</p>
                     <p className="text-[10px] text-[#888888]">{user.email}</p>
                   </div>
                 </div>
-                <button
-                  onClick={() => handleNavClick('dashboard')}
-                  className="px-3 py-1.5 text-xs emerald-gradient-btn text-white rounded-lg font-bold"
-                >
-                  Dashboard
-                </button>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => handleNavClick('dashboard')}
+                    className="py-2 text-xs emerald-gradient-btn text-white rounded-xl font-bold text-center"
+                  >
+                    Dashboard
+                  </button>
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      logoutUser();
+                    }}
+                    className="py-2 text-xs font-bold text-rose-600 bg-rose-500/10 dark:bg-rose-500/20 rounded-xl text-center"
+                  >
+                    Sign Out
+                  </button>
+                </div>
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-2 w-full">

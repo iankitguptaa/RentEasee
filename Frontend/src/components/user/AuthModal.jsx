@@ -4,7 +4,7 @@ import { useApp } from '../../context/AppContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const AuthModal = () => {
-  const { isAuthModalOpen, setIsAuthModalOpen, authMode, setAuthMode, setUser, showToast } = useApp();
+  const { isAuthModalOpen, setIsAuthModalOpen, authMode, setAuthMode, loginUser, signupUser, showToast } = useApp();
   
   const [formData, setFormData] = useState({
     name: '',
@@ -18,22 +18,11 @@ export const AuthModal = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setUser({
-      name: formData.name || (authMode === 'login' ? 'Aarav Sharma' : 'New User'),
-      email: formData.email || 'user@renteasee.com',
-      phone: formData.phone || '+91 98765 43210',
-      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
-      role: 'Tenant',
-      isLoggedIn: true
-    });
-
-    showToast(
-      authMode === 'login'
-        ? 'Welcome back to RentEasee!'
-        : 'Account created successfully! Welcome to RentEasee.',
-      'success'
-    );
-    setIsAuthModalOpen(false);
+    if (authMode === 'login') {
+      loginUser(formData);
+    } else {
+      signupUser(formData);
+    }
   };
 
   return (

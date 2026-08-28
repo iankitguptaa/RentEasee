@@ -5,7 +5,43 @@ import { PropertyCard } from '../components/property/PropertyCard';
 import { Bookmark, Calendar, User, ShieldCheck, ArrowRight, Clock, MapPin } from 'lucide-react';
 
 export const DashboardPage = () => {
-  const { user, savedPropertyIds, enquiries, navigateTo } = useApp();
+  const { user, savedPropertyIds, enquiries, navigateTo, setIsAuthModalOpen, setAuthMode } = useApp();
+
+  if (!user.isLoggedIn) {
+    return (
+      <div className="min-h-screen bg-[#fafafa] dark:bg-[#0f0f0f] py-16 flex items-center justify-center px-4">
+        <div className="bg-white dark:bg-[#171717] rounded-3xl p-8 sm:p-10 max-w-md w-full text-center border border-[#ebebeb] dark:border-[#262626] shadow-lg space-y-4">
+          <div className="w-16 h-16 rounded-2xl bg-[#16a34a]/10 text-[#16a34a] flex items-center justify-center mx-auto">
+            <User className="w-8 h-8" />
+          </div>
+          <h2 className="text-xl font-bold text-[#171717] dark:text-white tracking-tight">Sign In Required</h2>
+          <p className="text-xs text-[#888888] dark:text-[#a1a1a1] leading-relaxed">
+            Please log in or create an account to access your personal dashboard, track scheduled property visits, and view saved homes.
+          </p>
+          <div className="pt-2 flex gap-3">
+            <button
+              onClick={() => {
+                setAuthMode('login');
+                setIsAuthModalOpen(true);
+              }}
+              className="flex-1 py-2.5 text-xs font-semibold border border-[#ebebeb] dark:border-[#262626] rounded-xl text-[#171717] dark:text-white hover:bg-[#fafafa] dark:hover:bg-[#262626]"
+            >
+              Log In
+            </button>
+            <button
+              onClick={() => {
+                setAuthMode('signup');
+                setIsAuthModalOpen(true);
+              }}
+              className="flex-1 py-2.5 text-xs font-bold emerald-gradient-btn text-white rounded-xl shadow-md"
+            >
+              Sign Up
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const savedProperties = MOCK_PROPERTIES.filter(p => savedPropertyIds.includes(p.id));
 

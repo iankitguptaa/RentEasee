@@ -35,15 +35,96 @@ export const AppProvider = ({ children }) => {
     setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
   }, []);
 
+  // Toast notifications state
+  const [toast, setToast] = useState(null);
+
+  const showToast = useCallback((message, type = 'info') => {
+    setToast({ message, type, id: Date.now() });
+    setTimeout(() => {
+      setToast(null);
+    }, 4000);
+  }, []);
+
   // User state
-  const [user, setUser] = useState({
+  const defaultUser = {
     name: 'Aarav Sharma',
     email: 'aarav.sharma@example.com',
     phone: '+91 98765 43210',
     avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
     role: 'Tenant',
     isLoggedIn: true
+  };
+
+  const [user, setUser] = useState(() => {
+    try {
+      const stored = localStorage.getItem('renteasee_user');
+      if (stored && stored !== 'undefined') {
+        const parsed = JSON.parse(stored);
+        if (parsed && typeof parsed === 'object') {
+          return {
+            name: parsed.name ?? defaultUser.name,
+            email: parsed.email ?? defaultUser.email,
+            phone: parsed.phone ?? defaultUser.phone,
+            avatar: parsed.avatar ?? defaultUser.avatar,
+            role: parsed.role ?? defaultUser.role,
+            isLoggedIn: typeof parsed.isLoggedIn === 'boolean' ? parsed.isLoggedIn : defaultUser.isLoggedIn
+          };
+        }
+      }
+      return defaultUser;
+    } catch {
+      return defaultUser;
+    }
   });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('renteasee_user', JSON.stringify(user));
+    } catch (e) {
+      console.error(e);
+    }
+  }, [user]);
+
+  const loginUser = useCallback((formData) => {
+    const updatedUser = {
+      name: formData.name || (user?.name ? user.name : 'Aarav Sharma'),
+      email: formData.email || (user?.email ? user.email : 'aarav.sharma@example.com'),
+      phone: formData.phone || (user?.phone ? user.phone : '+91 98765 43210'),
+      avatar: user?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
+      role: 'Tenant',
+      isLoggedIn: true
+    };
+    setUser(updatedUser);
+    setIsAuthModalOpen(false);
+    showToast(`Welcome back, ${(updatedUser.name || 'User').split(' ')[0]}!`, 'success');
+  }, [showToast, user]);
+
+  const signupUser = useCallback((formData) => {
+    const updatedUser = {
+      name: formData.name || 'New User',
+      email: formData.email || 'user@renteasee.com',
+      phone: formData.phone || '+91 98765 43210',
+      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
+      role: 'Tenant',
+      isLoggedIn: true
+    };
+    setUser(updatedUser);
+    setIsAuthModalOpen(false);
+    showToast('Account created successfully! Welcome to RentEasee.', 'success');
+  }, [showToast]);
+
+  const logoutUser = useCallback(() => {
+    setUser({
+      name: '',
+      email: '',
+      phone: '',
+      avatar: '',
+      role: 'Guest',
+      isLoggedIn: false
+    });
+    showToast('You have been logged out.', 'info');
+    setActivePage('home');
+  }, [showToast]);
 
   // Saved / Favorite properties
   const [savedPropertyIds, setSavedPropertyIds] = useState(() => {
@@ -103,16 +184,6 @@ export const AppProvider = ({ children }) => {
       createdAt: '2026-08-16'
     }
   ]);
-
-  // Toast notifications state
-  const [toast, setToast] = useState(null);
-
-  const showToast = useCallback((message, type = 'info') => {
-    setToast({ message, type, id: Date.now() });
-    setTimeout(() => {
-      setToast(null);
-    }, 4000);
-  }, []);
 
   const toggleSaveProperty = useCallback((propertyId) => {
     setSavedPropertyIds(prev => {
@@ -180,6 +251,9 @@ export const AppProvider = ({ children }) => {
     addEnquiry,
     user,
     setUser,
+    loginUser,
+    signupUser,
+    logoutUser,
     isAuthModalOpen,
     setIsAuthModalOpen,
     authMode,
