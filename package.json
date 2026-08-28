@@ -1,0 +1,9 @@
+{
+  "name": "renteasee-root",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "build": "cd Frontend && npm run build",
+    "dev": "cd Frontend && npm run dev"
+  }
+}
