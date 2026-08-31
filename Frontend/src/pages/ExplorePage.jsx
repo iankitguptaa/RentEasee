@@ -13,8 +13,18 @@ export const ExplorePage = () => {
   // Filter properties based on active criteria
   const filteredProperties = useMemo(() => {
     return MOCK_PROPERTIES.filter((p) => {
-      if (filters.city !== 'All' && p.city.toLowerCase() !== filters.city.toLowerCase()) {
-        return false;
+      if (filters.city !== 'All') {
+        const filterCity = filters.city.toLowerCase();
+        const propCity = p.city.toLowerCase();
+        const propAddr = p.address.toLowerCase();
+        if (filterCity === 'delhi ncr') {
+          const ncrCities = ['new delhi', 'delhi', 'gurugram', 'gurgaon', 'noida', 'greater noida', 'ghaziabad', 'faridabad'];
+          if (!ncrCities.some(c => propCity.includes(c) || propAddr.includes(c))) {
+            return false;
+          }
+        } else if (!propCity.includes(filterCity) && !propAddr.includes(filterCity)) {
+          return false;
+        }
       }
       if (filters.type !== 'All' && p.type !== filters.type) {
         return false;

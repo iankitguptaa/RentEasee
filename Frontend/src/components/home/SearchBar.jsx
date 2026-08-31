@@ -27,13 +27,13 @@ export const SearchBar = () => {
               onChange={(e) => setFilters({ ...filters, city: e.target.value })}
               className="w-full bg-transparent text-xs font-bold text-[#171717] dark:text-white focus:outline-none cursor-pointer"
             >
-              <option value="All" className="dark:bg-[#171717]">All Cities (India)</option>
-              <option value="Mumbai" className="dark:bg-[#171717]">Mumbai</option>
-              <option value="Bengaluru" className="dark:bg-[#171717]">Bengaluru</option>
-              <option value="Delhi NCR" className="dark:bg-[#171717]">Delhi NCR</option>
-              <option value="Pune" className="dark:bg-[#171717]">Pune</option>
-              <option value="Hyderabad" className="dark:bg-[#171717]">Hyderabad</option>
-              <option value="Goa" className="dark:bg-[#171717]">Goa</option>
+              <option value="All" className="dark:bg-[#171717]">All Delhi NCR</option>
+              <option value="New Delhi" className="dark:bg-[#171717]">New Delhi</option>
+              <option value="Gurugram" className="dark:bg-[#171717]">Gurugram</option>
+              <option value="Noida" className="dark:bg-[#171717]">Noida</option>
+              <option value="Greater Noida" className="dark:bg-[#171717]">Greater Noida</option>
+              <option value="Ghaziabad" className="dark:bg-[#171717]">Ghaziabad</option>
+              <option value="Faridabad" className="dark:bg-[#171717]">Faridabad</option>
             </select>
           </div>
         </div>

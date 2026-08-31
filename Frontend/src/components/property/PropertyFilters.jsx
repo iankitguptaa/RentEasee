@@ -48,13 +48,13 @@ export const PropertyFilters = () => {
           onChange={(e) => setFilters({ ...filters, city: e.target.value })}
           className="w-full p-2 text-xs bg-[#fafafa] dark:bg-[#0f0f0f] border border-[#ebebeb] dark:border-[#262626] rounded-lg focus:outline-none focus:border-[#16a34a] cursor-pointer font-medium text-[#171717] dark:text-white"
         >
-          <option value="All">All Cities</option>
-          <option value="Mumbai">Mumbai</option>
-          <option value="Bengaluru">Bengaluru</option>
-          <option value="Delhi NCR">Delhi NCR</option>
-          <option value="Pune">Pune</option>
-          <option value="Hyderabad">Hyderabad</option>
-          <option value="Goa">Goa</option>
+          <option value="All">All Delhi NCR</option>
+          <option value="New Delhi">New Delhi</option>
+          <option value="Gurugram">Gurugram</option>
+          <option value="Noida">Noida</option>
+          <option value="Greater Noida">Greater Noida</option>
+          <option value="Ghaziabad">Ghaziabad</option>
+          <option value="Faridabad">Faridabad</option>
         </select>
       </div>
 

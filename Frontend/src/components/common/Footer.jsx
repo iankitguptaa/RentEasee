@@ -95,31 +95,36 @@ export const Footer = () => {
 
           {/* Column 2: Popular Cities */}
           <div className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-wider text-[#16a34a] font-mono">Top Cities</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-[#16a34a] font-mono">Top Cities (NCR)</p>
             <ul className="space-y-2 text-xs">
               <li>
-                <button onClick={() => navigateTo('explore', { city: 'Mumbai' })} className="hover:text-[#16a34a] transition-colors">
-                  Rent in Mumbai
+                <button onClick={() => navigateTo('explore', { city: 'New Delhi' })} className="hover:text-[#16a34a] transition-colors">
+                  Rent in New Delhi
                 </button>
               </li>
               <li>
-                <button onClick={() => navigateTo('explore', { city: 'Bengaluru' })} className="hover:text-[#16a34a] transition-colors">
-                  Rent in Bengaluru
+                <button onClick={() => navigateTo('explore', { city: 'Gurugram' })} className="hover:text-[#16a34a] transition-colors">
+                  Rent in Gurugram
                 </button>
               </li>
               <li>
-                <button onClick={() => navigateTo('explore', { city: 'Delhi NCR' })} className="hover:text-[#16a34a] transition-colors">
-                  Rent in Delhi NCR
+                <button onClick={() => navigateTo('explore', { city: 'Noida' })} className="hover:text-[#16a34a] transition-colors">
+                  Rent in Noida
                 </button>
               </li>
               <li>
-                <button onClick={() => navigateTo('explore', { city: 'Pune' })} className="hover:text-[#16a34a] transition-colors">
-                  Rent in Pune
+                <button onClick={() => navigateTo('explore', { city: 'Greater Noida' })} className="hover:text-[#16a34a] transition-colors">
+                  Rent in Greater Noida
                 </button>
               </li>
               <li>
-                <button onClick={() => navigateTo('explore', { city: 'Hyderabad' })} className="hover:text-[#16a34a] transition-colors">
-                  Rent in Hyderabad
+                <button onClick={() => navigateTo('explore', { city: 'Ghaziabad' })} className="hover:text-[#16a34a] transition-colors">
+                  Rent in Ghaziabad
+                </button>
+              </li>
+              <li>
+                <button onClick={() => navigateTo('explore', { city: 'Faridabad' })} className="hover:text-[#16a34a] transition-colors">
+                  Rent in Faridabad
                 </button>
               </li>
             </ul>

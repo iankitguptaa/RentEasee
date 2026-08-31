@@ -12,12 +12,12 @@ export const LocationGrid = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div className="text-center max-w-2xl mx-auto mb-12 space-y-2">
-          <span className="text-xs font-mono uppercase tracking-wider text-[#16a34a] font-bold">Popular Hubs</span>
+          <span className="text-xs font-mono uppercase tracking-wider text-[#16a34a] font-bold">Delhi NCR Popular Hubs</span>
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#171717] dark:text-white">
-            Find homes in top Indian cities
+            Find homes in top Delhi / NCR cities
           </h2>
           <p className="text-xs text-[#888888] dark:text-[#a1a1a1]">
-            Browse premium rental homes, apartments, and luxury villas in prime tech & metropolitan hubs.
+            Browse premium rental homes, apartments, and luxury villas across premier Delhi-NCR metropolitan hubs.
           </p>
         </div>
 
