@@ -1,4 +1,4 @@
-import React from 'react';
+ import React from 'react';
 import { Search, RotateCcw, Filter, MapPin, Home, SlidersHorizontal } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
