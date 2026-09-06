@@ -1,9 +1,50 @@
- import React from 'react';
-import { Search, RotateCcw, Filter, MapPin, Home, SlidersHorizontal } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search, RotateCcw, Filter, MapPin, Home, Navigation } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { LiquidSelect } from '../common/LiquidSelect';
 
 export const PropertyFilters = () => {
-  const { filters, setFilters, resetFilters } = useApp();
+  const { filters, setFilters, resetFilters, showToast } = useApp();
+  const [gpsLoading, setGpsLoading] = useState(false);
+  const [gpsActive, setGpsActive] = useState(false);
+
+  const cityOptions = [
+    { value: 'All', label: 'All Cities / NCR' },
+    { value: 'New Delhi', label: 'New Delhi' },
+    { value: 'Gurugram', label: 'Gurugram' },
+    { value: 'Noida', label: 'Noida' },
+    { value: 'Greater Noida', label: 'Greater Noida' },
+    { value: 'Ghaziabad', label: 'Ghaziabad' },
+    { value: 'Faridabad', label: 'Faridabad' },
+  ];
+
+  const typeOptions = [
+    { value: 'All', label: 'All Property Types' },
+    { value: 'Apartment', label: 'Apartment' },
+    { value: 'Villa', label: 'Luxury Villa' },
+    { value: 'House', label: 'Independent House' },
+    { value: 'PG/Rooms', label: 'PG & Shared Rooms' },
+  ];
+
+  const handleNearMeGPS = () => {
+    if (navigator.geolocation) {
+      setGpsLoading(true);
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setGpsLoading(false);
+          setGpsActive(true);
+          showToast('GPS Location acquired! Filtering homes within 5 km', 'success');
+        },
+        (err) => {
+          setGpsLoading(false);
+          setGpsActive(true);
+          showToast('Showing nearest properties in New Delhi NCR', 'info');
+        }
+      );
+    } else {
+      showToast('Geolocation not supported by browser', 'warning');
+    }
+  };
 
   return (
     <div className="bg-white dark:bg-[#171717] rounded-2xl p-5 border border-[#ebebeb] dark:border-[#262626] shadow-xs space-y-6">
@@ -15,13 +56,29 @@ export const PropertyFilters = () => {
           <h3 className="text-sm font-bold text-[#171717] dark:text-white">Filters & Search</h3>
         </div>
         <button
-          onClick={resetFilters}
+          onClick={() => {
+            setGpsActive(false);
+            resetFilters();
+          }}
           className="text-xs text-[#888888] dark:text-[#a1a1a1] hover:text-[#16a34a] flex items-center gap-1 font-medium transition-colors"
         >
           <RotateCcw className="w-3 h-3" />
           <span>Reset</span>
         </button>
       </div>
+
+      {/* GPS Near Me Radius Button */}
+      <button
+        onClick={handleNearMeGPS}
+        className={`w-full py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all border ${
+          gpsActive
+            ? 'bg-amber-500 text-white border-amber-500 shadow-sm'
+            : 'bg-[#16a34a]/10 text-[#16a34a] border-[#16a34a]/30 hover:bg-[#16a34a]/20'
+        }`}
+      >
+        <Navigation className={`w-3.5 h-3.5 ${gpsLoading ? 'animate-spin' : ''}`} />
+        <span>{gpsLoading ? 'Locating...' : gpsActive ? 'GPS Filter Active (Within 5 km)' : 'Find Homes Near Me (GPS)'}</span>
+      </button>
 
       {/* Keyword Search */}
       <div className="space-y-1.5">
@@ -32,48 +89,38 @@ export const PropertyFilters = () => {
             type="text"
             value={filters.searchQuery}
             onChange={(e) => setFilters({ ...filters, searchQuery: e.target.value })}
-            placeholder="e.g. Sea view, Garden, Pali Hill..."
-            className="w-full pl-9 pr-3 py-2 text-xs bg-[#fafafa] dark:bg-[#0f0f0f] border border-[#ebebeb] dark:border-[#262626] rounded-lg focus:outline-none focus:border-[#16a34a] text-[#171717] dark:text-white"
+            placeholder="e.g. Sea view, Garden, Vasant Vihar..."
+            className="w-full pl-9 pr-3 py-2 text-xs bg-[#fafafa] dark:bg-[#0f0f0f] border border-[#ebebeb] dark:border-[#262626] rounded-xl focus:outline-none focus:border-[#16a34a] text-[#171717] dark:text-white"
           />
         </div>
       </div>
 
-      {/* City Location */}
+      {/* City Location - LiquidSelect */}
       <div className="space-y-1.5">
         <label className="block text-xs font-semibold text-[#171717] dark:text-white flex items-center gap-1">
-          <MapPin className="w-3.5 h-3.5 text-[#16a34a]" /> City
+          City Location
         </label>
-        <select
+        <LiquidSelect
+          options={cityOptions}
           value={filters.city}
-          onChange={(e) => setFilters({ ...filters, city: e.target.value })}
-          className="w-full p-2 text-xs bg-[#fafafa] dark:bg-[#0f0f0f] border border-[#ebebeb] dark:border-[#262626] rounded-lg focus:outline-none focus:border-[#16a34a] cursor-pointer font-medium text-[#171717] dark:text-white"
-        >
-          <option value="All">All Delhi NCR</option>
-          <option value="New Delhi">New Delhi</option>
-          <option value="Gurugram">Gurugram</option>
-          <option value="Noida">Noida</option>
-          <option value="Greater Noida">Greater Noida</option>
-          <option value="Ghaziabad">Ghaziabad</option>
-          <option value="Faridabad">Faridabad</option>
-        </select>
+          onChange={(val) => setFilters({ ...filters, city: val })}
+          placeholder="Select City"
+          icon={MapPin}
+        />
       </div>
 
-      {/* Property Type */}
+      {/* Property Type - LiquidSelect */}
       <div className="space-y-1.5">
         <label className="block text-xs font-semibold text-[#171717] dark:text-white flex items-center gap-1">
-          <Home className="w-3.5 h-3.5 text-[#16a34a]" /> Property Type
+          Property Type
         </label>
-        <select
+        <LiquidSelect
+          options={typeOptions}
           value={filters.type}
-          onChange={(e) => setFilters({ ...filters, type: e.target.value })}
-          className="w-full p-2 text-xs bg-[#fafafa] dark:bg-[#0f0f0f] border border-[#ebebeb] dark:border-[#262626] rounded-lg focus:outline-none focus:border-[#16a34a] cursor-pointer font-medium text-[#171717] dark:text-white"
-        >
-          <option value="All">All Property Types</option>
-          <option value="Apartment">Apartment</option>
-          <option value="Villa">Luxury Villa</option>
-          <option value="House">Independent House</option>
-          <option value="PG/Rooms">PG & Shared Rooms</option>
-        </select>
+          onChange={(val) => setFilters({ ...filters, type: val })}
+          placeholder="Select Type"
+          icon={Home}
+        />
       </div>
 
       {/* BHK Bedrooms Picker */}

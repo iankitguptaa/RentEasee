@@ -1,9 +1,36 @@
 import React from 'react';
 import { Search, MapPin, Home, SlidersHorizontal } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { LiquidSelect } from '../common/LiquidSelect';
 
 export const SearchBar = () => {
   const { filters, setFilters, navigateTo } = useApp();
+
+  const cityOptions = [
+    { value: 'All', label: 'All Delhi NCR' },
+    { value: 'New Delhi', label: 'New Delhi' },
+    { value: 'Gurugram', label: 'Gurugram' },
+    { value: 'Noida', label: 'Noida' },
+    { value: 'Greater Noida', label: 'Greater Noida' },
+    { value: 'Ghaziabad', label: 'Ghaziabad' },
+    { value: 'Faridabad', label: 'Faridabad' },
+  ];
+
+  const typeOptions = [
+    { value: 'All', label: 'All Property Types' },
+    { value: 'Apartment', label: 'Apartment' },
+    { value: 'Villa', label: 'Luxury Villa' },
+    { value: 'House', label: 'Independent House' },
+    { value: 'PG/Rooms', label: 'PG & Shared Rooms' },
+  ];
+
+  const bhkOptions = [
+    { value: 'All', label: 'Any BHK' },
+    { value: '1', label: '1 BHK' },
+    { value: '2', label: '2 BHK' },
+    { value: '3', label: '3 BHK' },
+    { value: '4', label: '4+ BHK' },
+  ];
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -13,74 +40,51 @@ export const SearchBar = () => {
   return (
     <form
       onSubmit={handleSearch}
-      className="liquid-glass-card rounded-2xl p-3 sm:p-4 border border-white/60 dark:border-white/10 shadow-2xl hover:border-[#16a34a] transition-all duration-300 max-w-4xl mx-auto text-[#171717] dark:text-white"
+      className="relative z-50 overflow-visible liquid-glass-card rounded-3xl p-3 sm:p-4 border border-white/60 dark:border-white/10 shadow-2xl hover:border-[#16a34a] transition-all duration-300 max-w-4xl mx-auto text-[#171717] dark:text-white"
     >
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 items-center">
         
-        {/* City Filter */}
-        <div className="flex items-center gap-3 p-3 bg-white/60 dark:bg-black/60 backdrop-blur-md rounded-xl border border-white/60 dark:border-white/10 hover:border-[#16a34a] transition-colors">
-          <MapPin className="w-5 h-5 text-[#16a34a] shrink-0" />
-          <div className="flex-1 min-w-0">
-            <label className="block text-[10px] font-mono uppercase tracking-wider text-[#888888] dark:text-[#a1a1a1]">Location</label>
-            <select
-              value={filters.city}
-              onChange={(e) => setFilters({ ...filters, city: e.target.value })}
-              className="w-full bg-transparent text-xs font-bold text-[#171717] dark:text-white focus:outline-none cursor-pointer"
-            >
-              <option value="All" className="dark:bg-[#171717]">All Delhi NCR</option>
-              <option value="New Delhi" className="dark:bg-[#171717]">New Delhi</option>
-              <option value="Gurugram" className="dark:bg-[#171717]">Gurugram</option>
-              <option value="Noida" className="dark:bg-[#171717]">Noida</option>
-              <option value="Greater Noida" className="dark:bg-[#171717]">Greater Noida</option>
-              <option value="Ghaziabad" className="dark:bg-[#171717]">Ghaziabad</option>
-              <option value="Faridabad" className="dark:bg-[#171717]">Faridabad</option>
-            </select>
-          </div>
+        {/* City Filter - LiquidSelect */}
+        <div className="space-y-1">
+          <label className="block text-[10px] font-mono uppercase tracking-wider text-[#888888] dark:text-[#a1a1a1] px-1">Location</label>
+          <LiquidSelect
+            options={cityOptions}
+            value={filters.city}
+            onChange={(val) => setFilters({ ...filters, city: val })}
+            placeholder="Select City"
+            icon={MapPin}
+          />
         </div>
 
-        {/* Property Type */}
-        <div className="flex items-center gap-3 p-3 bg-white/60 dark:bg-black/60 backdrop-blur-md rounded-xl border border-white/60 dark:border-white/10 hover:border-[#16a34a] transition-colors">
-          <Home className="w-5 h-5 text-[#16a34a] shrink-0" />
-          <div className="flex-1 min-w-0">
-            <label className="block text-[10px] font-mono uppercase tracking-wider text-[#888888] dark:text-[#a1a1a1]">Property Type</label>
-            <select
-              value={filters.type}
-              onChange={(e) => setFilters({ ...filters, type: e.target.value })}
-              className="w-full bg-transparent text-xs font-bold text-[#171717] dark:text-white focus:outline-none cursor-pointer"
-            >
-              <option value="All" className="dark:bg-[#171717]">All Property Types</option>
-              <option value="Apartment" className="dark:bg-[#171717]">Apartment</option>
-              <option value="Villa" className="dark:bg-[#171717]">Luxury Villa</option>
-              <option value="House" className="dark:bg-[#171717]">Independent House</option>
-              <option value="PG/Rooms" className="dark:bg-[#171717]">PG & Shared Rooms</option>
-            </select>
-          </div>
+        {/* Property Type - LiquidSelect */}
+        <div className="space-y-1">
+          <label className="block text-[10px] font-mono uppercase tracking-wider text-[#888888] dark:text-[#a1a1a1] px-1">Property Type</label>
+          <LiquidSelect
+            options={typeOptions}
+            value={filters.type}
+            onChange={(val) => setFilters({ ...filters, type: val })}
+            placeholder="Select Type"
+            icon={Home}
+          />
         </div>
 
-        {/* BHK Config */}
-        <div className="flex items-center gap-3 p-3 bg-white/60 dark:bg-black/60 backdrop-blur-md rounded-xl border border-white/60 dark:border-white/10 hover:border-[#16a34a] transition-colors">
-          <SlidersHorizontal className="w-5 h-5 text-[#16a34a] shrink-0" />
-          <div className="flex-1 min-w-0">
-            <label className="block text-[10px] font-mono uppercase tracking-wider text-[#888888] dark:text-[#a1a1a1]">Bedrooms (BHK)</label>
-            <select
-              value={filters.bhk}
-              onChange={(e) => setFilters({ ...filters, bhk: e.target.value })}
-              className="w-full bg-transparent text-xs font-bold text-[#171717] dark:text-white focus:outline-none cursor-pointer"
-            >
-              <option value="All" className="dark:bg-[#171717]">Any BHK</option>
-              <option value="1" className="dark:bg-[#171717]">1 BHK</option>
-              <option value="2" className="dark:bg-[#171717]">2 BHK</option>
-              <option value="3" className="dark:bg-[#171717]">3 BHK</option>
-              <option value="4" className="dark:bg-[#171717]">4+ BHK</option>
-            </select>
-          </div>
+        {/* BHK Config - LiquidSelect */}
+        <div className="space-y-1">
+          <label className="block text-[10px] font-mono uppercase tracking-wider text-[#888888] dark:text-[#a1a1a1] px-1">Bedrooms (BHK)</label>
+          <LiquidSelect
+            options={bhkOptions}
+            value={filters.bhk}
+            onChange={(val) => setFilters({ ...filters, bhk: val })}
+            placeholder="Select BHK"
+            icon={SlidersHorizontal}
+          />
         </div>
 
         {/* Submit Search Button */}
-        <div className="sm:col-span-2 md:col-span-1">
+        <div className="sm:col-span-2 md:col-span-1 flex flex-col justify-end pt-5">
           <button
             type="submit"
-            className="w-full h-full py-3.5 px-6 emerald-gradient-btn text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg hover:scale-[1.03]"
+            className="w-full py-2.5 px-6 emerald-gradient-btn text-white text-xs font-bold rounded-2xl transition-all flex items-center justify-center gap-2 shadow-lg hover:scale-[1.03]"
           >
             <Search className="w-4 h-4" />
             <span>Search Homes</span>

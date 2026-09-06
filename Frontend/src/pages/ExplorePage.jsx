@@ -1,18 +1,24 @@
 import React, { useState, useMemo } from 'react';
-import { MOCK_PROPERTIES } from '../data/mockProperties';
 import { PropertyCard } from '../components/property/PropertyCard';
 import { PropertyFilters } from '../components/property/PropertyFilters';
+import { LiquidSelect } from '../components/common/LiquidSelect';
 import { useApp } from '../context/AppContext';
-import { LayoutGrid, List, SlidersHorizontal, ArrowUpDown, SearchX } from 'lucide-react';
+import { SlidersHorizontal, ArrowUpDown, SearchX } from 'lucide-react';
 
 export const ExplorePage = () => {
-  const { filters, setFilters, resetFilters } = useApp();
-  const [viewMode, setViewMode] = useState('grid');
+  const { properties, filters, setFilters, resetFilters } = useApp();
   const [showMobileFilter, setShowMobileFilter] = useState(false);
+
+  const sortOptions = [
+    { value: 'recommended', label: 'Sort: Recommended' },
+    { value: 'price-low', label: 'Rent: Low to High' },
+    { value: 'price-high', label: 'Rent: High to Low' },
+    { value: 'rating', label: 'Top Rated' },
+  ];
 
   // Filter properties based on active criteria
   const filteredProperties = useMemo(() => {
-    return MOCK_PROPERTIES.filter((p) => {
+    return properties.filter((p) => {
       if (filters.city !== 'All') {
         const filterCity = filters.city.toLowerCase();
         const propCity = p.city.toLowerCase();
@@ -55,7 +61,7 @@ export const ExplorePage = () => {
       if (filters.sortBy === 'rating') return b.rating - a.rating;
       return 0;
     });
-  }, [filters]);
+  }, [properties, filters]);
 
   return (
     <div className="min-h-screen bg-[#fafafa] dark:bg-[#0f0f0f] py-10">
@@ -73,7 +79,7 @@ export const ExplorePage = () => {
             </p>
           </div>
 
-          {/* Controls Bar: Sort, View Toggle, Mobile Filter Button */}
+          {/* Controls Bar: Sort, Mobile Filter Button */}
           <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={() => setShowMobileFilter(!showMobileFilter)}
@@ -83,85 +89,56 @@ export const ExplorePage = () => {
               <span>Filters</span>
             </button>
 
-            {/* Sort Selector */}
-            <div className="flex items-center gap-2 bg-[#fafafa] dark:bg-[#0f0f0f] px-3 py-1.5 rounded-xl border border-[#ebebeb] dark:border-[#262626]">
-              <ArrowUpDown className="w-3.5 h-3.5 text-[#888888]" />
-              <select
+            {/* LiquidSelect Sort Dropdown */}
+            <div className="w-48">
+              <LiquidSelect
+                options={sortOptions}
                 value={filters.sortBy}
-                onChange={(e) => setFilters({ ...filters, sortBy: e.target.value })}
-                className="bg-transparent text-xs font-semibold text-[#171717] dark:text-white focus:outline-none cursor-pointer"
-              >
-                <option value="recommended">Sort: Recommended</option>
-                <option value="price-low">Rent: Low to High</option>
-                <option value="price-high">Rent: High to Low</option>
-                <option value="rating">Top Rated</option>
-              </select>
-            </div>
-
-            {/* View Mode Toggle */}
-            <div className="hidden sm:flex items-center p-1 bg-[#fafafa] dark:bg-[#0f0f0f] rounded-xl border border-[#ebebeb] dark:border-[#262626]">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`p-1.5 rounded-lg transition-all ${
-                  viewMode === 'grid' ? 'bg-white dark:bg-[#171717] text-[#16a34a] shadow-xs' : 'text-[#888888]'
-                }`}
-                title="Grid view"
-              >
-                <LayoutGrid className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`p-1.5 rounded-lg transition-all ${
-                  viewMode === 'list' ? 'bg-white dark:bg-[#171717] text-[#16a34a] shadow-xs' : 'text-[#888888]'
-                }`}
-                title="List view"
-              >
-                <List className="w-4 h-4" />
-              </button>
+                onChange={(val) => setFilters({ ...filters, sortBy: val })}
+                icon={ArrowUpDown}
+              />
             </div>
           </div>
         </div>
 
-        {/* Main Explore Content Grid */}
+        {/* Mobile Filter Drawer */}
+        {showMobileFilter && (
+          <div className="lg:hidden mb-6 bg-white dark:bg-[#171717] p-6 rounded-2xl border border-[#ebebeb] dark:border-[#262626] shadow-sm">
+            <PropertyFilters />
+          </div>
+        )}
+
+        {/* Main Content Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           
-          {/* Desktop Filter Sidebar */}
+          {/* Desktop Filters Sidebar */}
           <div className="hidden lg:block lg:col-span-1">
-            <div className="sticky top-20">
+            <div className="sticky top-24 bg-white dark:bg-[#171717] p-6 rounded-2xl border border-[#ebebeb] dark:border-[#262626] shadow-xs">
               <PropertyFilters />
             </div>
           </div>
 
-          {/* Mobile Filter Drawer */}
-          {showMobileFilter && (
-            <div className="lg:hidden col-span-1 mb-4">
-              <PropertyFilters />
-            </div>
-          )}
-
-          {/* Properties List */}
+          {/* Property Grid */}
           <div className="lg:col-span-3">
             {filteredProperties.length > 0 ? (
-              <div className={`grid ${
-                viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 gap-6' : 'grid-cols-1 gap-6'
-              }`}>
-                {filteredProperties.map((property, idx) => (
-                  <PropertyCard key={property.id} property={property} index={idx} />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                {filteredProperties.map((prop) => (
+                  <PropertyCard key={prop.id || prop._id} property={prop} />
                 ))}
               </div>
             ) : (
-              /* Empty State */
-              <div className="bg-white dark:bg-[#171717] rounded-2xl p-12 border border-[#ebebeb] dark:border-[#262626] text-center space-y-4 my-8">
-                <div className="w-16 h-16 rounded-full bg-[#fafafa] dark:bg-[#0f0f0f] border border-[#ebebeb] dark:border-[#262626] text-[#888888] flex items-center justify-center mx-auto">
-                  <SearchX className="w-8 h-8 text-[#888888]" />
+              /* Empty Search Results State */
+              <div className="bg-[#171717] rounded-3xl p-12 text-center border border-[#262626] shadow-xs space-y-4">
+                <div className="w-16 h-16 rounded-2xl bg-[#0f0f0f] border border-[#262626] flex items-center justify-center mx-auto text-[#888888]">
+                  <SearchX className="w-8 h-8" />
                 </div>
-                <h3 className="text-xl font-bold text-[#171717] dark:text-white">No properties found</h3>
-                <p className="text-xs text-[#888888] dark:text-[#a1a1a1] max-w-sm mx-auto">
-                  We couldn't find any rental homes matching your search criteria. Try relaxing your budget slider or resetting filters.
+                <h3 className="text-lg font-bold text-white">No Homes Matched Your Filters</h3>
+                <p className="text-xs text-[#a1a1a1] max-w-sm mx-auto">
+                  Try clearing some filters or searching for another city locality to explore available properties.
                 </p>
                 <button
                   onClick={resetFilters}
-                  className="px-6 py-2.5 emerald-gradient-btn text-white text-xs font-semibold rounded-xl transition-colors shadow-xs"
+                  className="px-6 py-2.5 text-xs font-bold emerald-gradient-btn text-white rounded-xl shadow-xs"
                 >
                   Reset All Filters
                 </button>

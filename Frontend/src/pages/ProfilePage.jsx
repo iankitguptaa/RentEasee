@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { User, ShieldCheck, Save } from 'lucide-react';
+import { LiquidSelect } from '../components/common/LiquidSelect';
+import { User, ShieldCheck, Save, MapPin } from 'lucide-react';
 
 export const ProfilePage = () => {
   const { user, setUser, showToast, setIsAuthModalOpen, setAuthMode } = useApp();
@@ -13,6 +14,15 @@ export const ProfilePage = () => {
     budget: '₹80,000 - ₹1,20,000 / mo',
     occupation: 'Senior Software Engineer'
   });
+
+  const cityOptions = [
+    { value: 'Bengaluru', label: 'Bengaluru' },
+    { value: 'Mumbai', label: 'Mumbai' },
+    { value: 'New Delhi', label: 'New Delhi' },
+    { value: 'Gurugram', label: 'Gurugram' },
+    { value: 'Noida', label: 'Noida' },
+    { value: 'Pune', label: 'Pune' },
+  ];
 
   if (!user.isLoggedIn) {
     return (
@@ -88,7 +98,7 @@ export const ProfilePage = () => {
             <div>
               <h2 className="text-xl font-bold text-[#171717] dark:text-white">{user.name}</h2>
               <p className="text-xs text-[#888888] dark:text-[#a1a1a1]">{user.email}</p>
-              <p className="text-[11px] text-[#16a34a] font-semibold mt-1">Tenant Profile (Active)</p>
+              <p className="text-[11px] text-[#16a34a] font-semibold mt-1 capitalize">Account Mode: {user?.role || 'Tenant'}</p>
             </div>
           </div>
 
@@ -102,7 +112,7 @@ export const ProfilePage = () => {
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3 py-2 text-xs bg-[#fafafa] dark:bg-[#0f0f0f] border border-[#ebebeb] dark:border-[#262626] rounded-lg focus:outline-none focus:border-[#16a34a] text-[#171717] dark:text-white"
+                  className="w-full px-3 py-2 text-xs bg-[#fafafa] dark:bg-[#0f0f0f] border border-[#ebebeb] dark:border-[#262626] rounded-xl focus:outline-none focus:border-[#16a34a] text-[#171717] dark:text-white"
                 />
               </div>
 
@@ -113,7 +123,7 @@ export const ProfilePage = () => {
                   required
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-3 py-2 text-xs bg-[#fafafa] dark:bg-[#0f0f0f] border border-[#ebebeb] dark:border-[#262626] rounded-lg focus:outline-none focus:border-[#16a34a] text-[#171717] dark:text-white"
+                  className="w-full px-3 py-2 text-xs bg-[#fafafa] dark:bg-[#0f0f0f] border border-[#ebebeb] dark:border-[#262626] rounded-xl focus:outline-none focus:border-[#16a34a] text-[#171717] dark:text-white"
                 />
               </div>
 
@@ -124,7 +134,7 @@ export const ProfilePage = () => {
                   required
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full px-3 py-2 text-xs bg-[#fafafa] dark:bg-[#0f0f0f] border border-[#ebebeb] dark:border-[#262626] rounded-lg focus:outline-none focus:border-[#16a34a] text-[#171717] dark:text-white"
+                  className="w-full px-3 py-2 text-xs bg-[#fafafa] dark:bg-[#0f0f0f] border border-[#ebebeb] dark:border-[#262626] rounded-xl focus:outline-none focus:border-[#16a34a] text-[#171717] dark:text-white"
                 />
               </div>
 
@@ -134,59 +144,31 @@ export const ProfilePage = () => {
                   type="text"
                   value={formData.occupation}
                   onChange={(e) => setFormData({ ...formData, occupation: e.target.value })}
-                  className="w-full px-3 py-2 text-xs bg-[#fafafa] dark:bg-[#0f0f0f] border border-[#ebebeb] dark:border-[#262626] rounded-lg focus:outline-none focus:border-[#16a34a] text-[#171717] dark:text-white"
+                  className="w-full px-3 py-2 text-xs bg-[#fafafa] dark:bg-[#0f0f0f] border border-[#ebebeb] dark:border-[#262626] rounded-xl focus:outline-none focus:border-[#16a34a] text-[#171717] dark:text-white"
                 />
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-[#171717] dark:text-white mb-1">Preferred City</label>
-                <select
+                <LiquidSelect
+                  options={cityOptions}
                   value={formData.preferredCity}
-                  onChange={(e) => setFormData({ ...formData, preferredCity: e.target.value })}
-                  className="w-full px-3 py-2 text-xs bg-[#fafafa] dark:bg-[#0f0f0f] border border-[#ebebeb] dark:border-[#262626] rounded-lg focus:outline-none focus:border-[#16a34a] text-[#171717] dark:text-white"
-                >
-                  <option value="Mumbai">Mumbai</option>
-                  <option value="Bengaluru">Bengaluru</option>
-                  <option value="Delhi NCR">Delhi NCR</option>
-                  <option value="Pune">Pune</option>
-                  <option value="Hyderabad">Hyderabad</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-[#171717] dark:text-white mb-1">Budget Preference</label>
-                <input
-                  type="text"
-                  value={formData.budget}
-                  onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
-                  className="w-full px-3 py-2 text-xs bg-[#fafafa] dark:bg-[#0f0f0f] border border-[#ebebeb] dark:border-[#262626] rounded-lg focus:outline-none focus:border-[#16a34a] text-[#171717] dark:text-white"
+                  onChange={(val) => setFormData({ ...formData, preferredCity: val })}
+                  placeholder="Select City"
+                  icon={MapPin}
                 />
               </div>
             </div>
 
-            {/* Notification checkboxes */}
-            <div className="pt-4 border-t border-[#ebebeb] dark:border-[#262626] space-y-3">
-              <h3 className="text-xs font-bold text-[#171717] dark:text-white">Notification Preferences</h3>
-              <div className="space-y-2 text-xs text-[#4d4d4d] dark:text-[#a1a1a1]">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" defaultChecked className="rounded border-[#ebebeb] accent-[#16a34a]" />
-                  <span>Receive WhatsApp notifications for scheduled visit confirmations</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" defaultChecked className="rounded border-[#ebebeb] accent-[#16a34a]" />
-                  <span>Email alerts when new homes are listed in my saved locations</span>
-                </label>
-              </div>
+            <div className="flex justify-end pt-4 border-t border-[#ebebeb] dark:border-[#262626]">
+              <button
+                type="submit"
+                className="px-6 py-2.5 text-xs font-bold emerald-gradient-btn text-white rounded-xl shadow-xs flex items-center gap-2"
+              >
+                <Save className="w-4 h-4" />
+                <span>Save Profile Changes</span>
+              </button>
             </div>
-
-            <button
-              type="submit"
-              className="px-6 py-2.5 emerald-gradient-btn text-white text-xs font-bold rounded-xl shadow-sm flex items-center gap-2"
-            >
-              <Save className="w-4 h-4" />
-              <span>Save Profile Changes</span>
-            </button>
-
           </form>
 
         </div>

@@ -1,18 +1,20 @@
 import React, { useState } from 'react';
-import { Home, Compass, Bookmark, MessageSquare, User, Menu, X, ArrowUpRight, Search, Sun, Moon } from 'lucide-react';
+import { Home, Compass, Bookmark, MessageSquare, User, Menu, X, ArrowUpRight, Search, Sun, Moon, PlusCircle, Building2, KeyRound, RefreshCw } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Logo } from './Logo';
 
 export const Navbar = () => {
-  const { activePage, navigateTo, savedPropertyIds, user, logoutUser, setIsAuthModalOpen, setAuthMode, theme, toggleTheme } = useApp();
+  const { activePage, navigateTo, savedPropertyIds, user, logoutUser, setIsAuthModalOpen, setAuthMode, switchRole, theme, toggleTheme } = useApp();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+
+  const isOwner = user?.role?.toLowerCase() === 'owner';
 
   const navLinks = [
     { id: 'home', label: 'Home', icon: Home },
     { id: 'explore', label: 'Explore Homes', icon: Compass },
     { id: 'saved', label: 'Saved', icon: Bookmark, badge: savedPropertyIds.length },
-    { id: 'enquiries', label: 'Enquiries', icon: MessageSquare },
+    { id: 'enquiries', label: isOwner ? 'Tenant Inquiries' : 'My Requests', icon: MessageSquare },
   ];
 
   const handleNavClick = (pageId) => {
@@ -27,7 +29,7 @@ export const Navbar = () => {
         {/* Brand Adaptive Logo */}
         <div 
           onClick={() => handleNavClick('home')}
-          className="cursor-pointer"
+          className="cursor-pointer flex items-center gap-2"
         >
           <Logo size="normal" showTagline={true} />
         </div>
@@ -78,13 +80,16 @@ export const Navbar = () => {
             )}
           </button>
 
-          <button
-            onClick={() => handleNavClick('explore')}
-            className="flex items-center gap-1.5 text-xs font-semibold text-[#4d4d4d] dark:text-[#a1a1a1] hover:text-[#16a34a] dark:hover:text-white px-3.5 py-2 rounded-full border border-transparent hover:border-[#16a34a]/30 hover:bg-white/40 dark:hover:bg-white/10 backdrop-blur-md transition-all"
-          >
-            <Search className="w-3.5 h-3.5 text-[#16a34a]" />
-            <span>Search</span>
-          </button>
+          {/* OWNER "+ Post Property" CTA */}
+          {isOwner && (
+            <button
+              onClick={() => handleNavClick('dashboard')}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white rounded-full transition-all shadow-md"
+            >
+              <PlusCircle className="w-4 h-4" />
+              <span>+ Post Property</span>
+            </button>
+          )}
 
           {user.isLoggedIn ? (
             <div className="relative">
@@ -98,16 +103,24 @@ export const Navbar = () => {
                   className="w-6 h-6 rounded-full object-cover border border-[#16a34a]"
                 />
                 <span className="text-[#171717] dark:text-white font-medium">{(user?.name || 'User').split(' ')[0]}</span>
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-[#16a34a]/10 text-[#16a34a] capitalize">
+                  {isOwner ? 'Owner' : 'Tenant'}
+                </span>
               </button>
 
               {/* User Dropdown Menu */}
               {userDropdownOpen && (
                 <div 
-                  className="absolute right-0 mt-2 w-56 liquid-glass-card rounded-2xl p-2 z-50 text-xs text-[#171717] dark:text-white animate-fade-in"
+                  className="absolute right-0 mt-2 w-64 liquid-glass-card rounded-2xl p-2 z-50 text-xs text-[#171717] dark:text-white animate-fade-in"
                   onMouseLeave={() => setUserDropdownOpen(false)}
                 >
                   <div className="px-4 py-2.5 rounded-xl bg-white/40 dark:bg-black/40 mb-1 border border-white/40 dark:border-white/10">
-                    <p className="font-bold text-sm text-[#171717] dark:text-white">{user?.name || 'User'}</p>
+                    <p className="font-bold text-sm text-[#171717] dark:text-white flex items-center justify-between">
+                      <span>{user?.name || 'User'}</span>
+                      <span className="text-[10px] font-extrabold text-[#16a34a] bg-[#16a34a]/10 px-2 py-0.5 rounded-full uppercase">
+                        {isOwner ? 'Owner' : 'Tenant'}
+                      </span>
+                    </p>
                     <p className="text-[#888888] dark:text-[#a1a1a1] text-[11px] truncate">{user?.email || ''}</p>
                   </div>
                   
@@ -118,8 +131,19 @@ export const Navbar = () => {
                     }}
                     className="w-full text-left px-3.5 py-2 rounded-lg hover:bg-[#16a34a]/10 dark:hover:bg-[#16a34a]/20 flex items-center justify-between text-[#4d4d4d] dark:text-[#a1a1a1] hover:text-[#16a34a] dark:hover:text-white transition-colors"
                   >
-                    <span>User Dashboard</span>
+                    <span>{isOwner ? 'Owner Dashboard' : 'Tenant Dashboard'}</span>
                     <ArrowUpRight className="w-3.5 h-3.5 text-[#16a34a]" />
+                  </button>
+
+                  {/* QUICK ROLE SWITCHER BUTTON */}
+                  <button
+                    onClick={() => {
+                      switchRole(isOwner ? 'tenant' : 'owner');
+                    }}
+                    className="w-full text-left px-3.5 py-2 rounded-lg hover:bg-amber-500/10 dark:hover:bg-amber-500/20 flex items-center justify-between text-amber-600 dark:text-amber-400 font-semibold transition-colors"
+                  >
+                    <span>{isOwner ? 'Switch to Tenant View' : 'Switch to Owner View'}</span>
+                    <RefreshCw className="w-3.5 h-3.5 text-amber-500" />
                   </button>
 
                   <button
@@ -133,16 +157,18 @@ export const Navbar = () => {
                     <User className="w-3.5 h-3.5 text-[#16a34a]" />
                   </button>
 
-                  <button
-                    onClick={() => {
-                      setUserDropdownOpen(false);
-                      handleNavClick('saved');
-                    }}
-                    className="w-full text-left px-3.5 py-2 rounded-lg hover:bg-[#16a34a]/10 dark:hover:bg-[#16a34a]/20 flex items-center justify-between text-[#4d4d4d] dark:text-[#a1a1a1] hover:text-[#16a34a] dark:hover:text-white transition-colors"
-                  >
-                    <span>Saved Homes</span>
-                    <span className="text-[10px] bg-[#16a34a] text-white px-2 py-0.5 rounded-full font-mono font-bold">{savedPropertyIds.length}</span>
-                  </button>
+                  {!isOwner && (
+                    <button
+                      onClick={() => {
+                        setUserDropdownOpen(false);
+                        handleNavClick('saved');
+                      }}
+                      className="w-full text-left px-3.5 py-2 rounded-lg hover:bg-[#16a34a]/10 dark:hover:bg-[#16a34a]/20 flex items-center justify-between text-[#4d4d4d] dark:text-[#a1a1a1] hover:text-[#16a34a] dark:hover:text-white transition-colors"
+                    >
+                      <span>Saved Homes</span>
+                      <span className="text-[10px] bg-[#16a34a] text-white px-2 py-0.5 rounded-full font-mono font-bold">{savedPropertyIds.length}</span>
+                    </button>
+                  )}
 
                   <div className="border-t border-white/40 dark:border-white/10 my-1"></div>
 
@@ -165,18 +191,21 @@ export const Navbar = () => {
                   setAuthMode('login');
                   setIsAuthModalOpen(true);
                 }}
-                className="px-4 py-1.5 text-xs font-semibold text-[#171717] dark:text-white hover:bg-white/40 dark:hover:bg-white/10 rounded-full transition-colors"
+                className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-[#171717] dark:text-white hover:bg-white/40 dark:hover:bg-white/10 rounded-full transition-colors"
               >
-                Log in
+                <KeyRound className="w-3.5 h-3.5 text-[#16a34a]" />
+                <span>Tenant Login</span>
               </button>
+              
               <button
                 onClick={() => {
-                  setAuthMode('signup');
+                  setAuthMode('login');
                   setIsAuthModalOpen(true);
                 }}
-                className="px-4 py-1.5 text-xs font-bold emerald-gradient-btn text-white rounded-full transition-all shadow-md"
+                className="flex items-center gap-1.5 px-4 py-1.5 text-xs font-bold emerald-gradient-btn text-white rounded-full transition-all shadow-md"
               >
-                Sign Up
+                <Building2 className="w-3.5 h-3.5" />
+                <span>Owner Login / Post Free</span>
               </button>
             </div>
           )}
@@ -261,19 +290,21 @@ export const Navbar = () => {
                     setAuthMode('login');
                     setIsAuthModalOpen(true);
                   }}
-                  className="w-full py-2 text-xs font-medium border border-white/60 dark:border-white/10 rounded-lg text-[#171717] dark:text-white"
+                  className="w-full py-2 text-xs font-medium border border-white/60 dark:border-white/10 rounded-lg text-[#171717] dark:text-white flex items-center justify-center gap-1"
                 >
-                  Log in
+                  <KeyRound className="w-3.5 h-3.5 text-[#16a34a]" />
+                  <span>Tenant Login</span>
                 </button>
                 <button
                   onClick={() => {
                     setMobileMenuOpen(false);
-                    setAuthMode('signup');
+                    setAuthMode('login');
                     setIsAuthModalOpen(true);
                   }}
-                  className="w-full py-2 text-xs font-bold emerald-gradient-btn text-white rounded-lg"
+                  className="w-full py-2 text-xs font-bold emerald-gradient-btn text-white rounded-lg flex items-center justify-center gap-1"
                 >
-                  Sign Up
+                  <Building2 className="w-3.5 h-3.5" />
+                  <span>Owner Login</span>
                 </button>
               </div>
             )}

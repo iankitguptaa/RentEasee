@@ -3,7 +3,14 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
+    "start": "concurrently -n \"FRONTEND,BACKEND\" -c \"cyan.bold,magenta.bold\" \"npm run dev\" \"npm run server\"",
+    "dev:all": "concurrently -n \"FRONTEND,BACKEND\" -c \"cyan.bold,magenta.bold\" \"npm run dev\" \"npm run server\"",
     "build": "cd Frontend && npm run build",
-    "dev": "cd Frontend && npm run dev"
+    "dev": "cd Frontend && npm run dev",
+    "server": "cd Backend && npm start",
+    "server:dev": "cd Backend && npm run dev"
+  },
+  "dependencies": {
+    "concurrently": "^9.1.2"
   }
 }

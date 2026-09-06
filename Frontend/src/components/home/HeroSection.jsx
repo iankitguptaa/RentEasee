@@ -9,7 +9,7 @@ export const HeroSection = () => {
   const { navigateTo } = useApp();
 
   return (
-    <section className="relative overflow-hidden pt-16 pb-24 md:pt-24 md:pb-32 border-b border-[#ebebeb] dark:border-[#262626] min-h-[660px] flex flex-col justify-center">
+    <section className="relative overflow-visible pt-16 pb-24 md:pt-24 md:pb-32 border-b border-[#ebebeb] dark:border-[#262626] min-h-[660px] flex flex-col justify-center">
       
       {/* Full Hero Background Image with Floating Liquid Overlay */}
       <div className="absolute inset-0 z-0">
@@ -103,22 +103,22 @@ export const HeroSection = () => {
           </div>
         </motion.div>
 
-        {/* Search Component */}
+        {/* Search Component with High Z-Index Stacking */}
         <motion.div 
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4 }}
-          className="max-w-4xl mx-auto"
+          className="max-w-4xl mx-auto relative z-30"
         >
           <SearchBar />
         </motion.div>
 
-        {/* Trust Badges & Metrics */}
+        {/* Trust Badges & Metrics with Lower Z-Index */}
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.5 }}
-          className="pt-6 border-t border-white/15 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto text-center"
+          className="pt-6 border-t border-white/15 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto text-center relative z-10"
         >
           <motion.div whileHover={{ scale: 1.05 }} className="p-3 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xs hover:border-[#16a34a]/50 transition-all cursor-default">
             <div className="text-2xl sm:text-3xl font-bold font-mono text-white">10,000+</div>

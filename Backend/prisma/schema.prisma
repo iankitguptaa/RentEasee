@@ -1,0 +1,82 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  TENANT
+  OWNER
+  ADMIN
+}
+
+model User {
+  id              String     @id @default(uuid())
+  name            String
+  email           String     @unique
+  password        String
+  phone           String?    @default("")
+  role            Role       @default(TENANT)
+  avatar          String?    @default("https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300")
+  properties      Property[] @relation("OwnerProperties")
+  enquiries       Enquiry[]  @relation("UserEnquiries")
+  savedProperties Property[] @relation("SavedUserProperties")
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+}
+
+model Property {
+  id            String    @id @default(uuid())
+  title         String
+  tagline       String?   @default("")
+  city          String
+  locality      String
+  address       String
+  price         Float
+  deposit       Float?    @default(0)
+  maintenance   Float?    @default(0)
+  type          String
+  bhk           Int
+  bathrooms     Int       @default(1)
+  areaSqFt      Int
+  furnishing    String    @default("Semi-Furnished")
+  floor         String?   @default("Ground")
+  facing        String?   @default("East Facing")
+  availableFrom String?   @default("Immediate")
+  verified      Boolean   @default(true)
+  featured      Boolean   @default(false)
+  rating        Float     @default(4.8)
+  reviewsCount  Int       @default(12)
+  images        String[]
+  amenities     String[]
+  description   String
+  ownerId       String?
+  ownerName     String    @default("Verified Owner")
+  ownerAvatar   String    @default("https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80")
+  ownerPhone    String    @default("+91 98765 43210")
+  owner         User?     @relation("OwnerProperties", fields: [ownerId], references: [id], onDelete: SetNull)
+  savedByUsers  User[]    @relation("SavedUserProperties")
+  enquiries     Enquiry[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Enquiry {
+  id            String   @id @default(uuid())
+  propertyId    String
+  property      Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  propertyTitle String
+  senderId      String?
+  sender        User?    @relation("UserEnquiries", fields: [senderId], references: [id], onDelete: SetNull)
+  senderName    String
+  senderEmail   String
+  senderPhone   String
+  moveInDate    String?  @default("Immediate")
+  message       String
+  status        String   @default("Pending")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}

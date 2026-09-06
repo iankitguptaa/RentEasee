@@ -2,18 +2,41 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { PropertyGalleryModal } from '../components/property/PropertyGalleryModal';
 import { ScheduleVisitModal } from '../components/property/ScheduleVisitModal';
+import { RentAgreementModal } from '../components/property/RentAgreementModal';
 import { 
   ArrowLeft, MapPin, ShieldCheck, Heart, Share2, Bed, Bath, Maximize2, 
-  Calendar, Check, Phone, UserCheck
+  Calendar, Check, Phone, UserCheck, MessageCircle, FileText, Star, Send
 } from 'lucide-react';
 
 export const PropertyDetailPage = () => {
-  const { selectedProperty, navigateTo, savedPropertyIds, toggleSaveProperty, showToast } = useApp();
+  const { selectedProperty, navigateTo, savedPropertyIds, toggleSaveProperty, user, showToast } = useApp();
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+  const [isAgreementModalOpen, setIsAgreementModalOpen] = useState(false);
+
+  // Reviews state
+  const [reviewsList, setReviewsList] = useState([
+    {
+      id: 'rev-1',
+      name: 'Rohan Verma',
+      rating: 5,
+      date: 'August 2026',
+      comment: 'Stunning high-rise flat! The balcony view of the green park is even better than photos. Owner Vikram was super polite during our visit.',
+      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80'
+    },
+    {
+      id: 'rev-2',
+      name: 'Pooja Hegde',
+      rating: 5,
+      date: 'July 2026',
+      comment: 'Very quiet society, high security, and 24/7 power backup worked flawlessly. Highly recommended for working executives!',
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'
+    }
+  ]);
+  const [newReview, setNewReview] = useState({ rating: 5, comment: '' });
 
   const property = selectedProperty;
-  const isSaved = savedPropertyIds.includes(property.id);
+  const isSaved = savedPropertyIds.includes(property.id || property._id);
 
   const formatPrice = (price) => {
     if (price >= 100000) {
@@ -27,6 +50,28 @@ export const PropertyDetailPage = () => {
       navigator.clipboard.writeText(window.location.href);
       showToast('Property link copied to clipboard!', 'success');
     }
+  };
+
+  const handleWhatsAppChat = () => {
+    const phone = property.owner?.phone ? property.owner.phone.replace(/[^0-9]/g, '') : '919820144512';
+    const text = encodeURIComponent(`Hi ${property.owner?.name || 'Owner'}, I saw your property "${property.title}" listed on RentEasee for ₹${property.price}/month and would like to chat with you.`);
+    window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
+  };
+
+  const handleAddReview = (e) => {
+    e.preventDefault();
+    if (!newReview.comment.trim()) return;
+    const revObj = {
+      id: `rev-${Date.now()}`,
+      name: user?.name || 'Tenant Reviewer',
+      rating: Number(newReview.rating),
+      date: 'Just Now',
+      comment: newReview.comment,
+      avatar: user?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80'
+    };
+    setReviewsList(prev => [revObj, ...prev]);
+    setNewReview({ rating: 5, comment: '' });
+    showToast('Your verified review has been posted!', 'success');
   };
 
   return (
@@ -52,7 +97,7 @@ export const PropertyDetailPage = () => {
               <Share2 className="w-4 h-4" />
             </button>
             <button
-              onClick={() => toggleSaveProperty(property.id)}
+              onClick={() => toggleSaveProperty(property.id || property._id)}
               className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold border transition-all ${
                 isSaved
                   ? 'bg-rose-500 text-white border-rose-500 shadow-sm'
@@ -68,8 +113,6 @@ export const PropertyDetailPage = () => {
         {/* Gallery Grid Section */}
         <div className="relative group rounded-3xl overflow-hidden border border-[#ebebeb] dark:border-[#262626] shadow-md bg-neutral-900">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-2 aspect-16/9 md:aspect-21/9">
-            
-            {/* Main Hero Photo */}
             <div 
               onClick={() => setIsGalleryOpen(true)}
               className="md:col-span-2 relative cursor-pointer overflow-hidden"
@@ -81,7 +124,6 @@ export const PropertyDetailPage = () => {
               />
             </div>
 
-            {/* Thumbnail Photos */}
             {property.images.slice(1, 5).map((img, idx) => (
               <div
                 key={idx}
@@ -96,47 +138,36 @@ export const PropertyDetailPage = () => {
               </div>
             ))}
           </div>
-
-          {/* View All Photos Button */}
-          <button
-            onClick={() => setIsGalleryOpen(true)}
-            className="absolute bottom-4 right-4 bg-white/90 dark:bg-black/80 backdrop-blur-md text-[#171717] dark:text-white text-xs font-bold px-4 py-2 rounded-xl shadow-lg hover:bg-white transition-all border border-white/50"
-          >
-            View All {property.images.length} Photos
-          </button>
         </div>
 
-        {/* Property Info Layout */}
+        {/* Property Main Specs Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
-          {/* Main Details (2 columns) */}
-          <div className="lg:col-span-2 space-y-8">
+          {/* Main Content Details (2 columns) */}
+          <div className="lg:col-span-2 space-y-6">
             
-            {/* Title & Location Header */}
-            <div className="bg-white dark:bg-[#171717] rounded-2xl p-6 border border-[#ebebeb] dark:border-[#262626] shadow-xs space-y-3">
+            <div className="space-y-2">
               <div className="flex items-center gap-2">
-                {property.verified && (
-                  <span className="flex items-center gap-1 text-xs font-semibold bg-[#16a34a]/10 text-[#16a34a] px-3 py-1 rounded-full border border-[#16a34a]/20">
-                    <ShieldCheck className="w-4 h-4" /> Verified Rental
-                  </span>
-                )}
-                <span className="text-xs font-semibold bg-[#fafafa] dark:bg-[#0f0f0f] border border-[#ebebeb] dark:border-[#262626] text-[#171717] dark:text-white px-3 py-1 rounded-full">
+                <span className="text-[10px] font-mono font-bold bg-[#16a34a]/10 text-[#16a34a] px-2.5 py-0.5 rounded-full border border-[#16a34a]/20">
                   {property.type}
+                </span>
+                <span className="text-[10px] font-mono font-bold bg-amber-500/10 text-amber-600 px-2.5 py-0.5 rounded-full border border-amber-500/20">
+                  Verified Owner Photo Upload
                 </span>
               </div>
 
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#171717] dark:text-white">
                 {property.title}
               </h1>
-
-              <p className="text-xs text-[#888888] dark:text-[#a1a1a1] font-medium flex items-center gap-1.5">
-                <MapPin className="w-4 h-4 text-[#16a34a] shrink-0" />
+              
+              <div className="flex items-center gap-1.5 text-xs text-[#888888] dark:text-[#a1a1a1]">
+                <MapPin className="w-4 h-4 text-[#16a34a]" />
                 <span>{property.address}</span>
-              </p>
+              </div>
             </div>
 
-            {/* Spec Cards Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {/* Quick Spec Pills */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div className="bg-white dark:bg-[#171717] rounded-2xl p-4 border border-[#ebebeb] dark:border-[#262626] text-center space-y-1">
                 <Bed className="w-5 h-5 text-[#16a34a] mx-auto" />
                 <div className="text-xs text-[#888888] dark:text-[#a1a1a1]">Bedrooms</div>
@@ -146,7 +177,7 @@ export const PropertyDetailPage = () => {
               <div className="bg-white dark:bg-[#171717] rounded-2xl p-4 border border-[#ebebeb] dark:border-[#262626] text-center space-y-1">
                 <Bath className="w-5 h-5 text-[#16a34a] mx-auto" />
                 <div className="text-xs text-[#888888] dark:text-[#a1a1a1]">Bathrooms</div>
-                <div className="text-sm font-bold text-[#171717] dark:text-white">{property.bathrooms} Baths</div>
+                <div className="text-sm font-bold text-[#171717] dark:text-white">{property.bathrooms} Bath</div>
               </div>
 
               <div className="bg-white dark:bg-[#171717] rounded-2xl p-4 border border-[#ebebeb] dark:border-[#262626] text-center space-y-1">
@@ -168,25 +199,6 @@ export const PropertyDetailPage = () => {
               <p className="text-xs text-[#4d4d4d] dark:text-[#a1a1a1] leading-relaxed whitespace-pre-line">
                 {property.description}
               </p>
-              
-              <div className="pt-4 border-t border-[#ebebeb] dark:border-[#262626] grid grid-cols-2 gap-4 text-xs text-[#4d4d4d] dark:text-[#a1a1a1]">
-                <div>
-                  <span className="text-[#888888] dark:text-[#a1a1a1] block">Furnishing Status</span>
-                  <span className="font-semibold text-[#171717] dark:text-white">{property.furnishing}</span>
-                </div>
-                <div>
-                  <span className="text-[#888888] dark:text-[#a1a1a1] block">Floor Level</span>
-                  <span className="font-semibold text-[#171717] dark:text-white">{property.floor}</span>
-                </div>
-                <div>
-                  <span className="text-[#888888] dark:text-[#a1a1a1] block">Facing Direction</span>
-                  <span className="font-semibold text-[#171717] dark:text-white">{property.facing}</span>
-                </div>
-                <div>
-                  <span className="text-[#888888] dark:text-[#a1a1a1] block">Maintenance Fee</span>
-                  <span className="font-semibold text-[#171717] dark:text-white">₹{property.maintenance.toLocaleString('en-IN')} / mo</span>
-                </div>
-              </div>
             </div>
 
             {/* Amenities Grid */}
@@ -202,6 +214,81 @@ export const PropertyDetailPage = () => {
                   </div>
                 ))}
               </div>
+            </div>
+
+            {/* TENANT REVIEWS & RATINGS SECTION */}
+            <div className="bg-white dark:bg-[#171717] rounded-2xl p-6 border border-[#ebebeb] dark:border-[#262626] shadow-xs space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-base font-bold text-[#171717] dark:text-white flex items-center gap-2">
+                    <span>Verified Tenant Reviews</span>
+                    <span className="text-xs font-mono font-bold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
+                      ★ {property.rating || 4.9} ({reviewsList.length} reviews)
+                    </span>
+                  </h3>
+                  <p className="text-xs text-[#888888]">Authentic ratings from tenants who visited this property</p>
+                </div>
+              </div>
+
+              {/* Review Input Form */}
+              <form onSubmit={handleAddReview} className="p-4 bg-[#fafafa] dark:bg-[#0f0f0f] rounded-2xl border border-[#ebebeb] dark:border-[#262626] space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-[#171717] dark:text-white">Write a Review for this Home</label>
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        type="button"
+                        key={star}
+                        onClick={() => setNewReview({ ...newReview, rating: star })}
+                        className="text-amber-400 focus:outline-none"
+                      >
+                        <Star className={`w-4 h-4 ${star <= newReview.rating ? 'fill-amber-400 text-amber-400' : 'text-[#888888]'}`} />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <textarea
+                  rows="2"
+                  required
+                  value={newReview.comment}
+                  onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
+                  placeholder="Share your experience regarding room condition, society security, locality, or owner response..."
+                  className="w-full p-2.5 text-xs bg-white dark:bg-[#171717] border border-[#ebebeb] dark:border-[#262626] rounded-xl text-[#171717] dark:text-white"
+                ></textarea>
+
+                <button
+                  type="submit"
+                  className="px-4 py-2 text-xs font-bold emerald-gradient-btn text-white rounded-xl shadow-xs flex items-center gap-1.5"
+                >
+                  <Send className="w-3.5 h-3.5" />
+                  <span>Submit Verified Review</span>
+                </button>
+              </form>
+
+              {/* Reviews List */}
+              <div className="space-y-4">
+                {reviewsList.map((rev) => (
+                  <div key={rev.id} className="p-4 bg-[#fafafa] dark:bg-[#0f0f0f] rounded-xl border border-[#ebebeb] dark:border-[#262626] space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2.5">
+                        <img src={rev.avatar} alt={rev.name} className="w-8 h-8 rounded-full object-cover border border-[#16a34a]" />
+                        <div>
+                          <p className="text-xs font-bold text-[#171717] dark:text-white">{rev.name}</p>
+                          <p className="text-[10px] text-[#888888]">{rev.date}</p>
+                        </div>
+                      </div>
+                      <div className="flex text-amber-400">
+                        {Array.from({ length: rev.rating }).map((_, i) => (
+                          <Star key={i} className="w-3.5 h-3.5 fill-amber-400" />
+                        ))}
+                      </div>
+                    </div>
+                    <p className="text-xs text-[#4d4d4d] dark:text-[#a1a1a1] leading-relaxed">{rev.comment}</p>
+                  </div>
+                ))}
+              </div>
+
             </div>
 
           </div>
@@ -239,35 +326,40 @@ export const PropertyDetailPage = () => {
                     <p className="text-[11px] text-[#16a34a] font-medium flex items-center gap-1">
                       <UserCheck className="w-3.5 h-3.5" /> {property.owner.type}
                     </p>
-                    <p className="text-[10px] text-[#888888] dark:text-[#a1a1a1] mt-0.5">{property.owner.responseRate}</p>
+                    <p className="text-[10px] text-[#888888] dark:text-[#a1a1a1] mt-0.5">{property.owner.phone}</p>
                   </div>
                 </div>
               </div>
 
               {/* Action CTAs */}
               <div className="space-y-3">
+                
+                {/* 💬 GREEN WHATSAPP DIRECT CHAT BUTTON */}
+                <button
+                  onClick={handleWhatsAppChat}
+                  className="w-full py-3 bg-[#25D366] hover:bg-[#20bd5a] text-white text-xs font-bold rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
+                >
+                  <MessageCircle className="w-4 h-4 fill-white" />
+                  <span>Chat on WhatsApp with Owner</span>
+                </button>
+
+                {/* 📄 RENT AGREEMENT GENERATOR BUTTON */}
+                <button
+                  onClick={() => setIsAgreementModalOpen(true)}
+                  className="w-full py-2.5 bg-[#fafafa] dark:bg-[#0f0f0f] border border-[#ebebeb] dark:border-[#262626] text-[#171717] dark:text-white hover:border-[#16a34a] text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2"
+                >
+                  <FileText className="w-4 h-4 text-[#16a34a]" />
+                  <span>Generate Rent Agreement (PDF)</span>
+                </button>
+
+                {/* SCHEDULE VISIT BUTTON */}
                 <button
                   onClick={() => setIsScheduleModalOpen(true)}
                   className="w-full py-3 emerald-gradient-btn text-white text-xs font-bold rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
                 >
-                  <Calendar className="w-4 h-4 text-white" />
-                  <span>Schedule Inspection Visit</span>
+                  <Calendar className="w-4 h-4" />
+                  <span>Schedule In-Person Visit</span>
                 </button>
-
-                <button
-                  onClick={() => {
-                    showToast(`Contacting ${property.owner.name} at ${property.owner.phone}`, 'info');
-                  }}
-                  className="w-full py-3 bg-[#fafafa] dark:bg-[#0f0f0f] border border-[#ebebeb] dark:border-[#262626] hover:border-[#16a34a] text-[#171717] dark:text-white text-xs font-semibold rounded-xl transition-colors flex items-center justify-center gap-2"
-                >
-                  <Phone className="w-4 h-4 text-emerald-600" />
-                  <span>{property.owner.phone}</span>
-                </button>
-              </div>
-
-              {/* Security info */}
-              <div className="pt-2 text-center text-[10px] text-[#888888] dark:text-[#a1a1a1] leading-tight">
-                No brokerage fee charged by RentEasee. Verified homeowner identity.
               </div>
 
             </div>
@@ -277,19 +369,24 @@ export const PropertyDetailPage = () => {
 
       </div>
 
-      {/* Lightbox Gallery Modal */}
+      {/* Modals */}
       <PropertyGalleryModal
         images={property.images}
-        title={property.title}
         isOpen={isGalleryOpen}
         onClose={() => setIsGalleryOpen(false)}
       />
 
-      {/* Schedule Visit Modal */}
       <ScheduleVisitModal
         property={property}
         isOpen={isScheduleModalOpen}
         onClose={() => setIsScheduleModalOpen(false)}
+      />
+
+      <RentAgreementModal
+        property={property}
+        user={user}
+        isOpen={isAgreementModalOpen}
+        onClose={() => setIsAgreementModalOpen(false)}
       />
 
     </div>

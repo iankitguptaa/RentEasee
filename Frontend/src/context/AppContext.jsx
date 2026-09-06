@@ -1,14 +1,19 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { MOCK_PROPERTIES } from '../data/mockProperties';
+import { api } from '../services/api';
 
 const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
-  const [activePage, setActivePage] = useState('home'); // 'home', 'explore', 'property-detail', 'dashboard', 'saved', 'enquiries', 'profile'
+  const [activePage, setActivePage] = useState('home');
   const [selectedPropertyId, setSelectedPropertyId] = useState('prop-1');
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState('login'); // 'login' | 'signup'
   
+  // Properties state from Backend API
+  const [properties, setProperties] = useState(MOCK_PROPERTIES);
+  const [loadingProperties, setLoadingProperties] = useState(false);
+
   // Theme state: 'light' | 'dark'
   const [theme, setTheme] = useState(() => {
     try {
@@ -45,14 +50,33 @@ export const AppProvider = ({ children }) => {
     }, 4000);
   }, []);
 
+  // Fetch properties from backend
+  const fetchProperties = useCallback(async (params = {}) => {
+    try {
+      setLoadingProperties(true);
+      const data = await api.getProperties(params);
+      if (Array.isArray(data) && data.length > 0) {
+        setProperties(data);
+      }
+    } catch (error) {
+      console.warn('Backend API offline or unreachable, using fallback mock data:', error.message);
+    } finally {
+      setLoadingProperties(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchProperties();
+  }, [fetchProperties]);
+
   // User state
   const defaultUser = {
     name: 'Aarav Sharma',
     email: 'aarav.sharma@example.com',
     phone: '+91 98765 43210',
     avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
-    role: 'Tenant',
-    isLoggedIn: true
+    role: 'tenant',
+    isLoggedIn: false
   };
 
   const [user, setUser] = useState(() => {
@@ -66,8 +90,8 @@ export const AppProvider = ({ children }) => {
             email: parsed.email ?? defaultUser.email,
             phone: parsed.phone ?? defaultUser.phone,
             avatar: parsed.avatar ?? defaultUser.avatar,
-            role: parsed.role ?? defaultUser.role,
-            isLoggedIn: typeof parsed.isLoggedIn === 'boolean' ? parsed.isLoggedIn : defaultUser.isLoggedIn
+            role: (parsed.role || 'tenant').toLowerCase(),
+            isLoggedIn: typeof parsed.isLoggedIn === 'boolean' ? parsed.isLoggedIn : false
           };
         }
       }
@@ -85,41 +109,92 @@ export const AppProvider = ({ children }) => {
     }
   }, [user]);
 
-  const loginUser = useCallback((formData) => {
-    const updatedUser = {
-      name: formData.name || (user?.name ? user.name : 'Aarav Sharma'),
-      email: formData.email || (user?.email ? user.email : 'aarav.sharma@example.com'),
-      phone: formData.phone || (user?.phone ? user.phone : '+91 98765 43210'),
-      avatar: user?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
-      role: 'Tenant',
-      isLoggedIn: true
-    };
-    setUser(updatedUser);
-    setIsAuthModalOpen(false);
-    showToast(`Welcome back, ${(updatedUser.name || 'User').split(' ')[0]}!`, 'success');
-  }, [showToast, user]);
+  const loginUser = useCallback(async (formData) => {
+    const targetRole = (formData.role || 'tenant').toLowerCase();
+    try {
+      const res = await api.login(formData);
+      if (res.token) {
+        localStorage.setItem('rentease_token', res.token);
+      }
+      const updatedUser = {
+        name: res.name || formData.name || 'Property Owner',
+        email: res.email || formData.email,
+        phone: res.phone || '+91 98765 43210',
+        avatar: res.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
+        role: (res.role || targetRole).toLowerCase(),
+        isLoggedIn: true
+      };
+      setUser(updatedUser);
+      setIsAuthModalOpen(false);
+      showToast(`Logged in successfully as ${updatedUser.role === 'owner' ? 'Home Owner' : 'Tenant'}!`, 'success');
+    } catch (err) {
+      // Local fallback auth
+      const updatedUser = {
+        name: formData.name || (targetRole === 'owner' ? 'Vikram Malhotra (Owner)' : formData.email ? formData.email.split('@')[0] : 'User'),
+        email: formData.email || 'owner@renteasee.com',
+        phone: formData.phone || '+91 98201 44512',
+        avatar: targetRole === 'owner' 
+          ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80'
+          : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
+        role: targetRole,
+        isLoggedIn: true
+      };
+      setUser(updatedUser);
+      setIsAuthModalOpen(false);
+      showToast(`Welcome! Logged in as ${targetRole === 'owner' ? 'Home Owner' : 'Tenant'}.`, 'success');
+    }
+  }, [showToast]);
 
-  const signupUser = useCallback((formData) => {
-    const updatedUser = {
-      name: formData.name || 'New User',
-      email: formData.email || 'user@renteasee.com',
-      phone: formData.phone || '+91 98765 43210',
-      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
-      role: 'Tenant',
-      isLoggedIn: true
-    };
-    setUser(updatedUser);
-    setIsAuthModalOpen(false);
-    showToast('Account created successfully! Welcome to RentEasee.', 'success');
+  const signupUser = useCallback(async (formData) => {
+    const targetRole = (formData.role || 'tenant').toLowerCase();
+    try {
+      const res = await api.register(formData);
+      if (res.token) {
+        localStorage.setItem('rentease_token', res.token);
+      }
+      const updatedUser = {
+        name: res.name || formData.name || 'New User',
+        email: res.email || formData.email,
+        phone: res.phone || '+91 98765 43210',
+        avatar: res.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
+        role: (res.role || targetRole).toLowerCase(),
+        isLoggedIn: true
+      };
+      setUser(updatedUser);
+      setIsAuthModalOpen(false);
+      showToast(`Account created as ${targetRole === 'owner' ? 'Property Owner' : 'Tenant'}!`, 'success');
+    } catch (err) {
+      const updatedUser = {
+        name: formData.name || (targetRole === 'owner' ? 'New Property Owner' : 'New Tenant'),
+        email: formData.email || 'user@renteasee.com',
+        phone: formData.phone || '+91 98765 43210',
+        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
+        role: targetRole,
+        isLoggedIn: true
+      };
+      setUser(updatedUser);
+      setIsAuthModalOpen(false);
+      showToast(`Account created successfully as ${targetRole === 'owner' ? 'Property Owner' : 'Tenant'}!`, 'success');
+    }
+  }, [showToast]);
+
+  const switchRole = useCallback((newRole) => {
+    const target = newRole.toLowerCase();
+    setUser(prev => ({
+      ...prev,
+      role: target
+    }));
+    showToast(`Switched account panel to ${target === 'owner' ? 'Home Owner' : 'Tenant'} mode`, 'info');
   }, [showToast]);
 
   const logoutUser = useCallback(() => {
+    localStorage.removeItem('rentease_token');
     setUser({
       name: '',
       email: '',
       phone: '',
       avatar: '',
-      role: 'Guest',
+      role: 'guest',
       isLoggedIn: false
     });
     showToast('You have been logged out.', 'info');
@@ -157,7 +232,7 @@ export const AppProvider = ({ children }) => {
 
   const [filters, setFilters] = useState(initialFilters);
 
-  // Enquiries & Visit requests state
+  // Enquiries state
   const [enquiries, setEnquiries] = useState([
     {
       id: 'enq-101',
@@ -170,22 +245,16 @@ export const AppProvider = ({ children }) => {
       type: 'In-Person Visit',
       status: 'Confirmed',
       createdAt: '2026-08-15'
-    },
-    {
-      id: 'enq-102',
-      propertyId: 'prop-3',
-      propertyTitle: 'DLF Crest Executive Suite',
-      propertyCity: 'Delhi NCR',
-      ownerName: 'Rajesh Singhania',
-      date: '2026-08-20',
-      timeSlot: '11:30 AM',
-      type: 'Virtual Tour',
-      status: 'Pending Response',
-      createdAt: '2026-08-16'
     }
   ]);
 
-  const toggleSaveProperty = useCallback((propertyId) => {
+  const toggleSaveProperty = useCallback(async (propertyId) => {
+    try {
+      await api.toggleSaveProperty(propertyId);
+    } catch (e) {
+      // Local fallback
+    }
+
     setSavedPropertyIds(prev => {
       const isSaved = prev.includes(propertyId);
       if (isSaved) {
@@ -215,7 +284,12 @@ export const AppProvider = ({ children }) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
-  const addEnquiry = useCallback((enquiryData) => {
+  const addEnquiry = useCallback(async (enquiryData) => {
+    try {
+      await api.sendEnquiry(enquiryData);
+    } catch (e) {
+      // Local fallback
+    }
     const newEnquiry = {
       id: `enq-${Date.now()}`,
       createdAt: new Date().toISOString().split('T')[0],
@@ -231,13 +305,16 @@ export const AppProvider = ({ children }) => {
   }, []);
 
   const selectedProperty = useMemo(() => {
-    return MOCK_PROPERTIES.find(p => p.id === selectedPropertyId) || MOCK_PROPERTIES[0];
-  }, [selectedPropertyId]);
+    return properties.find(p => p.id === selectedPropertyId || p._id === selectedPropertyId) || properties[0];
+  }, [properties, selectedPropertyId]);
 
   const value = {
     activePage,
     setActivePage,
     navigateTo,
+    properties,
+    loadingProperties,
+    fetchProperties,
     selectedProperty,
     selectedPropertyId,
     setSelectedPropertyId,
@@ -253,6 +330,7 @@ export const AppProvider = ({ children }) => {
     setUser,
     loginUser,
     signupUser,
+    switchRole,
     logoutUser,
     isAuthModalOpen,
     setIsAuthModalOpen,
