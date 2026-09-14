@@ -3,12 +3,12 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "start": "concurrently -n \"FRONTEND,BACKEND\" -c \"cyan.bold,magenta.bold\" \"npm run dev\" \"npm run server\"",
-    "dev:all": "concurrently -n \"FRONTEND,BACKEND\" -c \"cyan.bold,magenta.bold\" \"npm run dev\" \"npm run server\"",
-    "build": "cd Frontend && npm run build",
-    "dev": "cd Frontend && npm run dev",
-    "server": "cd Backend && npm start",
-    "server:dev": "cd Backend && npm run dev"
+    "start": "concurrently -n \"FRONTEND,BACKEND\" -c \"cyan.bold,magenta.bold\" \"npm --prefix Frontend run dev\" \"npm --prefix Backend start\"",
+    "dev:all": "concurrently -n \"FRONTEND,BACKEND\" -c \"cyan.bold,magenta.bold\" \"npm --prefix Frontend run dev\" \"npm --prefix Backend start\"",
+    "build": "npm --prefix Frontend run build",
+    "dev": "npm --prefix Frontend run dev",
+    "server": "npm --prefix Backend start",
+    "server:dev": "npm --prefix Backend run dev"
   },
   "dependencies": {
     "concurrently": "^9.1.2"

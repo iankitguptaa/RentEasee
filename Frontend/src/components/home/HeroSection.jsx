@@ -9,10 +9,10 @@ export const HeroSection = () => {
   const { navigateTo } = useApp();
 
   return (
-    <section className="relative overflow-visible pt-16 pb-24 md:pt-24 md:pb-32 border-b border-[#ebebeb] dark:border-[#262626] min-h-[660px] flex flex-col justify-center">
+    <section className="relative overflow-hidden pt-16 pb-24 md:pt-24 md:pb-32 border-b border-[#ebebeb] dark:border-[#262626] min-h-[660px] flex flex-col justify-center">
       
       {/* Full Hero Background Image with Floating Liquid Overlay */}
-      <div className="absolute inset-0 z-0">
+      <div className="absolute inset-0 z-0 overflow-hidden">
         <motion.img
           initial={{ scale: 1.15 }}
           animate={{ scale: 1.05 }}
