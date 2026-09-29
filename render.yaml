@@ -16,6 +16,8 @@ services:
           property: connectionString
       - key: JWT_SECRET
         generateValue: true
+      - key: FRONTEND_URL
+        value: https://your-frontend.vercel.app  # ← Vercel deploy ke baad apna URL daalo
 
 databases:
   - name: rentease-db
